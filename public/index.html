@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>联赛赛程与积分核算台</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand">
+        <span class="brand-mark">赛</span>
+        <div>
+          <strong id="season-name">赛季</strong>
+          <small>赛程与积分核算台</small>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button type="button" class="nav-item is-active" data-view="overview"><span>概览</span><em>全局</em></button>
+        <button type="button" class="nav-item" data-view="teams"><span>球队</span><em id="nav-teams">0</em></button>
+        <button type="button" class="nav-item" data-view="venues"><span>场地</span><em id="nav-venues">0</em></button>
+        <button type="button" class="nav-item" data-view="matches"><span>赛程</span><em id="nav-matches">0</em></button>
+        <button type="button" class="nav-item" data-view="table"><span>积分榜</span><em>名次</em></button>
+      </nav>
+
+      <div class="rail-foot">
+        <label class="who">当前操作者
+          <input id="operator" placeholder="填上你的名字" maxlength="40">
+        </label>
+        <div class="link-state" id="link-state"><span class="dot"></span>连接中</div>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <header class="stage-head">
+        <div>
+          <h1 id="view-title">概览</h1>
+          <p id="view-sub">整季的场次进度与最近赛果</p>
+        </div>
+        <div class="head-actions" id="head-actions"></div>
+      </header>
+
+      <section class="view is-active" id="view-overview">
+        <div class="stat-row" id="stat-row"></div>
+        <div class="split">
+          <article class="card">
+            <header class="card-head"><h2>最近赛果</h2><span class="hint">按日期倒序取最近五场</span></header>
+            <ul class="feed" id="recent-feed"></ul>
+          </article>
+          <article class="card">
+            <header class="card-head"><h2>积分榜前三</h2><span class="hint" id="points-hint"></span></header>
+            <ul class="podium" id="podium"></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-teams">
+        <div class="toolbar">
+          <div class="segmented" id="team-status-filter">
+            <button type="button" class="is-active" data-value="">全部</button>
+            <button type="button" data-value="参赛">参赛</button>
+            <button type="button" data-value="退赛">退赛</button>
+          </div>
+          <input id="team-keyword" placeholder="搜队名、简称或城市" maxlength="24">
+          <button type="button" class="ghost" id="team-search">查询</button>
+        </div>
+        <article class="card">
+          <table class="grid">
+            <thead>
+              <tr>
+                <th>档位</th><th>球队</th><th>简称</th><th>城市</th><th>主场</th><th>场次</th><th>状态</th><th>备注</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="team-rows"></tbody>
+          </table>
+          <p class="empty" id="team-empty">没有符合条件的球队</p>
+        </article>
+      </section>
+
+      <section class="view" id="view-venues">
+        <div class="toolbar">
+          <input id="venue-keyword" placeholder="搜场地名称或城市" maxlength="30">
+          <button type="button" class="ghost" id="venue-search">查询</button>
+        </div>
+        <div class="venue-grid" id="venue-grid"></div>
+        <p class="empty" id="venue-empty">没有符合条件的场地</p>
+      </section>
+
+      <section class="view" id="view-matches">
+        <div class="toolbar">
+          <div class="chips" id="round-chips"></div>
+          <select id="match-status">
+            <option value="">全部状态</option>
+            <option value="待赛">待赛</option>
+            <option value="已赛">已赛</option>
+            <option value="延期">延期</option>
+            <option value="取消">取消</option>
+          </select>
+          <input id="match-keyword" placeholder="搜球队名或城市" maxlength="24">
+          <button type="button" class="ghost" id="match-search">查询</button>
+        </div>
+        <article class="card">
+          <table class="grid">
+            <thead>
+              <tr>
+                <th>轮次</th><th>日期</th><th>时刻</th><th>主队</th><th>比分</th><th>客队</th><th>场地</th><th>状态</th><th>备注</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="match-rows"></tbody>
+          </table>
+          <p class="empty" id="match-empty">没有符合条件的赛程</p>
+        </article>
+      </section>
+
+      <section class="view" id="view-table">
+        <div class="toolbar">
+          <input id="table-keyword" placeholder="搜队名或城市" maxlength="24">
+          <button type="button" class="ghost" id="table-search">查询</button>
+          <span class="hint" id="table-hint"></span>
+        </div>
+        <article class="card">
+          <table class="grid standings">
+            <thead>
+              <tr>
+                <th>名次</th><th>球队</th><th>场次</th><th>胜</th><th>平</th><th>负</th>
+                <th>进球</th><th>失球</th><th>净胜</th><th>积分</th>
+              </tr>
+            </thead>
+            <tbody id="table-rows"></tbody>
+          </table>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+  <aside class="drawer" id="drawer">
+    <header class="drawer-head">
+      <h2 id="drawer-title">编辑</h2>
+      <button type="button" class="icon" id="drawer-close">×</button>
+    </header>
+    <form id="drawer-form" autocomplete="off"></form>
+    <footer class="drawer-foot">
+      <button type="button" class="primary" id="drawer-submit">保存</button>
+      <button type="button" class="ghost" id="drawer-cancel">取消</button>
+    </footer>
+  </aside>
+
+  <div class="toasts" id="toasts"></div>
+  <script src="app.js"></script>
+</body>
+</html>
