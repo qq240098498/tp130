@@ -12,6 +12,7 @@ const MAX_VENUE_NAME = 30;
 const MAX_NOTE = 200;
 const MAX_TEAMS = 12;
 const STATUS_POOL = ['待赛', '已赛', '延期', '取消'];
+const TEAM_STATUS_POOL = ['参赛', '退赛'];
 
 // 初始数据：八支球队、四个场地（其中两支球队共用中立体育场）、七轮单循环共二十八场，
 // 前三轮已经打完并记了比分，第四轮有一场延期，其余待赛
@@ -142,7 +143,7 @@ function normalize(raw) {
       city: typeof item.city === 'string' ? item.city.trim() : '',
       venueId: venueIds.has(item.venueId) ? item.venueId : '',
       seedRank: Number.isInteger(Number(item.seedRank)) ? Number(item.seedRank) : index + 1,
-      status: STATUS_POOL.includes(item.status) ? item.status : '参赛',
+      status: TEAM_STATUS_POOL.includes(item.status) ? item.status : '参赛',
       note: typeof item.note === 'string' ? item.note : '',
       createdAt: typeof item.createdAt === 'string' ? item.createdAt : new Date().toISOString(),
       updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : new Date().toISOString(),
@@ -212,6 +213,6 @@ module.exports = {
   MAX_NOTE,
   MAX_TEAMS,
   MATCH_STATUS: ['待赛', '已赛', '延期', '取消'],
-  TEAM_STATUS: ['参赛', '退赛'],
+  TEAM_STATUS: TEAM_STATUS_POOL,
   DATA_FILE,
 };

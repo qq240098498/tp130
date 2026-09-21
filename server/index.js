@@ -91,6 +91,15 @@ app.post('/api/matches', (req, res) => {
   }
 });
 
+// 一键按单循环生成整季赛程：每轮四场，日期与主客场地自动排好
+app.post('/api/matches/generate', (req, res) => {
+  try {
+    res.status(201).json(api.generateSchedule(req.body));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 app.patch('/api/matches/:id', (req, res) => {
   try {
     res.json(api.updateMatch(req.params.id, req.body));

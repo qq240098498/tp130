@@ -315,6 +315,19 @@ function openResultDrawer(match) {
   showDrawer();
 }
 
+function openGenerateDrawer() {
+  state.drawer = { mode: 'generate', entity: 'schedule', id: '', title: '按单循环生成整季赛程' };
+  el('drawer-form').innerHTML = `
+    <div class="field-row">
+      <label class="field"><span>第一轮日期</span><input data-name="startDate" maxlength="10" value="" placeholder="2026-03-07"></label>
+      <label class="field"><span>开赛时刻</span><input data-name="kickoff" maxlength="5" value="15:30" placeholder="15:30"></label>
+    </div>
+    <p class="hint">参赛球队按档位固定轮转：八支队共七轮，每轮四场，每轮里每支球队只出现一次，整季任意两支队恰好碰一次，主客两边均衡。</p>
+    <p class="hint">每一轮的日期在上一轮之后隔一周，场地按主队主场取；主队主场当天不是可用日时自动顺延到最近的可用日，顺延几天会写进这场的备注。同一支球队主场被多队共用、同一天排两场时，第二场自动放到 19:30。</p>
+    <p class="hint">生成会清掉现有的待赛、延期与取消场次后整季重排；已经打完并登记比分的场次会让生成被拦下，需要先手动处理。</p>`;
+  showDrawer();
+}
+
 function showDrawer() {
   el('drawer-title').textContent = state.drawer.title;
   el('drawer').classList.add('show');
@@ -379,6 +392,11 @@ async function submitDrawer() {
       }
       await Promise.all([loadMatches(), loadSummary()]);
       if (state.view === 'table') await loadStandings();
+    } else if (entity === 'schedule') {
+      const result = await request('/api/matches/generate', { method: 'POST', body: JSON.stringify(payload) });
+      const shifted = result.matches.filter((item) => item.note).length;
+      toast(`已生成 ${result.rounds.length} 轮共 ${result.generated} 场，其中 ${shifted} 场因主场不可用顺延`, 'ok');
+      await Promise.all([loadMatches(), loadSummary()]);
     }
     closeDrawer();
   } catch (err) {
@@ -443,6 +461,9 @@ el('match-search').addEventListener('click', () => {
 el('match-status').addEventListener('change', () => {
   state.matchFilter.status = el('match-status').value;
   loadMatches().catch((err) => toast(err.message, 'bad'));
+});
+el('match-generate').addEventListener('click', () => {
+  openGenerateDrawer();
 });
 el('table-search').addEventListener('click', () => {
   state.tableFilter.keyword = el('table-keyword').value.trim();

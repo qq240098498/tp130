@@ -4,6 +4,7 @@ const { load } = require('./store');
 const teams = require('./teams');
 const venues = require('./venues');
 const matches = require('./matches');
+const schedule = require('./schedule');
 const { computeTable } = require('./standings');
 
 function readQuery(query, name) {
@@ -57,4 +58,5 @@ module.exports = {
   ...teams,
   ...venues,
   ...matches,
+  ...schedule,
 };
