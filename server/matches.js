@@ -236,4 +236,4 @@ function deleteMatch(id) {
   return { id: removed.id, round: removed.round };
 }
 
-module.exports = { listMatches, createMatch, updateMatch, recordResult, deleteMatch, resolveVenueId };
+module.exports = { listMatches, createMatch, updateMatch, recordResult, deleteMatch, resolveVenueId, checkDate };

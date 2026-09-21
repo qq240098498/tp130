@@ -6,6 +6,7 @@ const state = {
   venues: [],
   matches: [],
   rounds: [],
+  matchTotal: 0,
   standings: null,
   summary: null,
   drawer: { mode: '', entity: '', id: '', title: '' },
@@ -115,6 +116,7 @@ async function loadMatches() {
   const payload = await request(`/api/matches${params.toString() ? `?${params}` : ''}`);
   state.matches = payload.matches;
   state.rounds = payload.rounds;
+  state.matchTotal = payload.total;
   el('nav-matches').textContent = String(payload.total);
   renderMatches();
 }
@@ -315,6 +317,28 @@ function openResultDrawer(match) {
   showDrawer();
 }
 
+/* 一键生成整季单循环赛程 */
+async function openGenerateDrawer() {
+  let active = 0;
+  try {
+    const payload = await request('/api/teams?status=参赛');
+    active = payload.teams.length;
+  } catch (err) {
+    toast(err.message, 'bad');
+    return;
+  }
+  const rounds = active % 2 === 0 ? active - 1 : active;
+  const total = (active * (active - 1)) / 2;
+  const existing = state.matchTotal;
+  state.drawer = { mode: 'generate', entity: 'match', id: '', title: '生成整季赛程' };
+  el('drawer-form').innerHTML = `
+    <label class="field"><span>首轮日期</span><input data-name="startDate" maxlength="10" placeholder="2026-03-14"></label>
+    <p class="hint">按 ${active} 支参赛球队单循环编排：共 ${rounds} 轮 ${total} 场，每一轮在上一轮之后隔一周；主客轮换交替，不会全给一边；场地取主队主场，当天不可用就顺延到最近一个可用日，并在备注里写明挪了几天。</p>
+    ${existing ? `<p class="hint warn">当前已有 ${existing} 场赛程（含已登记的比分），生成会把它们全部清空重排。</p>
+    <label class="field check"><input type="checkbox" data-name="replace"> <span>确认清空现有 ${existing} 场赛程并重新生成</span></label>` : ''}`;
+  showDrawer();
+}
+
 function showDrawer() {
   el('drawer-title').textContent = state.drawer.title;
   el('drawer').classList.add('show');
@@ -352,7 +376,15 @@ async function submitDrawer() {
   const { payload, days } = collectForm();
   const { mode, entity, id } = state.drawer;
   try {
-    if (entity === 'team') {
+    if (mode === 'generate') {
+      const replaceBox = el('drawer-form').querySelector('[data-name="replace"]');
+      const result = await request('/api/matches/generate', {
+        method: 'POST',
+        body: JSON.stringify({ startDate: payload.startDate, replace: replaceBox ? replaceBox.checked : false }),
+      });
+      toast(`已生成 ${result.rounds} 轮 ${result.matches} 场赛程${result.shifted ? `，其中 ${result.shifted} 场因场地原因顺延` : ''}`, 'ok');
+      await Promise.all([loadMatches(), loadSummary()]);
+    } else if (entity === 'team') {
       const body = { ...payload, seedRank: Number(payload.seedRank) };
       if (mode === 'edit') await request(`/api/teams/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(body) });
       else await request('/api/teams', { method: 'POST', body: JSON.stringify(body) });
@@ -395,8 +427,11 @@ async function switchView(view) {
   const meta = VIEW_META[view];
   el('view-title').textContent = meta.title;
   el('view-sub').textContent = meta.sub;
-  el('head-actions').innerHTML = meta.action ? `<button type="button" class="primary" id="head-add">${meta.action}</button>` : '';
+  const generate = view === 'matches' ? '<button type="button" class="ghost" id="head-generate">生成整季赛程</button>' : '';
+  el('head-actions').innerHTML = `${generate}${meta.action ? `<button type="button" class="primary" id="head-add">${meta.action}</button>` : ''}`;
   if (meta.action) el('head-add').addEventListener('click', () => openDrawerFor(view, null));
+  const generateBtn = document.getElementById('head-generate');
+  if (generateBtn) generateBtn.addEventListener('click', openGenerateDrawer);
 
   try {
     if (view === 'overview') await loadSummary();

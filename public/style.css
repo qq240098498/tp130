@@ -104,6 +104,7 @@ input:focus, select:focus { outline: 2px solid var(--brand-soft); border-color: 
 
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
 .hint { color: var(--ink-soft); font-size: 12px; }
+.hint.warn { color: var(--amber); background: var(--amber-soft); border-radius: 8px; padding: 7px 10px; margin: 0; }
 
 .segmented { display: inline-flex; padding: 3px; border-radius: 10px; background: #e8edf3; }
 .segmented button {
@@ -192,6 +193,8 @@ table.grid.standings td:nth-child(n+3) { font-family: Consolas, "Courier New", m
 .drawer-foot { margin-top: auto; display: flex; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--line); }
 .field { display: flex; flex-direction: column; gap: 4px; }
 .field > span { color: var(--ink-soft); font-size: 12px; }
+.field.check { flex-direction: row; align-items: center; gap: 8px; }
+.field.check > span { color: var(--ink); font-size: 13px; }
 .field.invalid > span { color: var(--danger); }
 .field.invalid input, .field.invalid select { border-color: var(--danger); background: var(--danger-soft); }
 .field-row { display: flex; gap: 10px; }

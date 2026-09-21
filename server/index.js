@@ -91,6 +91,15 @@ app.post('/api/matches', (req, res) => {
   }
 });
 
+// 一键生成整季单循环赛程：已有赛程时必须带 replace=true 才会清空重排
+app.post('/api/matches/generate', (req, res) => {
+  try {
+    res.status(201).json(api.generateSeason(req.body || {}));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 app.patch('/api/matches/:id', (req, res) => {
   try {
     res.json(api.updateMatch(req.params.id, req.body));
